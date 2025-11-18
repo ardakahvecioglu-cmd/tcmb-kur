@@ -27,12 +27,8 @@
     background:#1a1f29; border-radius:12px; padding:8px 6px;
   }
   .label { font-size:12px; color:#aaa; }
-  .value-box { height:26px; position:relative; }
-  .val {
-    position:absolute; left:0; right:0; top:0;
-    font-size:22px; font-weight:bold;
-    display:none;
-  }
+  .value-box { height:26px; }
+  .val { font-size:22px; font-weight:bold; display:none; }
 </style>
 </head>
 
@@ -45,28 +41,28 @@
   <div class="card">
     <div class="label">USD / TRY</div>
     <div class="value-box">
-      <span id="usd" class="val" style="color:#f5c518;">--</span>
+      <div id="usd" class="val">--</div>
     </div>
   </div>
 
   <div class="card">
     <div class="label">EUR / TRY</div>
     <div class="value-box">
-      <span id="eur" class="val" style="color:#f5c518;">--</span>
+      <div id="eur" class="val">--</div>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GBP / TRY</div>
     <div class="value-box">
-      <span id="gbp" class="val" style="color:#f5c518;">--</span>
+      <div id="gbp" class="val">--</div>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GRAM ALTIN</div>
     <div class="value-box">
-      <span id="gold" class="val" style="color:#f5c518;">--</span>
+      <div id="gold" class="val">--</div>
     </div>
   </div>
 
@@ -74,9 +70,11 @@
 
 <script>
 function show(prefix, val){
-  var el = document.getElementById(prefix);
-  el.innerHTML = val;
-  el.style.display = "block";     // VIPLEX bunu kabul ediyor
+  // TAURUS UYUMLU RENDER: <font color="">
+  document.getElementById(prefix).innerHTML =
+    "<font color='#f5c518'>" + val + "</font>";
+
+  document.getElementById(prefix).style.display = "block";
 }
 
 var cacheUSD = null;
@@ -86,14 +84,13 @@ function applyChange(prefix, value){
     show(prefix, "--");
     return;
   }
-  show(prefix, value.toFixed(2)); // her zaman sarı inline
+  show(prefix, value.toFixed(2));
 }
 
 function fetchRates(){
   fetch("/.netlify/functions/tcmb")
     .then(r => r.json())
     .then(data => {
-
       cacheUSD = data.USD;
 
       applyChange("usd", data.USD);
