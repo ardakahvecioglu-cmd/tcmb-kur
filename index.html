@@ -10,7 +10,7 @@
   footer { position:absolute; bottom:0; left:0; width:100%; display:flex; justify-content:space-between; padding:10px 15px; background:rgba(0,0,0,0.8); border-top:1px solid #222; }
   .card { flex:1; text-align:center; margin:0 5px; background:#1a1f29; border-radius:12px; padding:8px 6px; }
   .label { font-size:12px; color:#aaa; }
-  .value { font-size:22px; font-weight:bold; }
+  .value { font-size:22px; font-weight:bold; color:#ffffff; }
 </style>
 </head>
 
@@ -31,13 +31,14 @@ function el(id){ return document.getElementById(id); }
 var last = {};
 var cacheUSD = null;
 
+// VIPLEX UYUMLU RENK MOTORU
 function applyChange(id, val){
   var e = el(id);
-  if (!e) return;
+  if(!e) return;
 
-  if (!isFinite(val)) {
-    e.innerHTML = "--";
-    e.style.color = "#ffffff";
+  if(!isFinite(val)){
+    e.innerHTML="--";
+    e.style.cssText = "color:#ffffff; font-weight:bold;";
     return;
   }
 
@@ -46,19 +47,23 @@ function applyChange(id, val){
 
   e.innerHTML = val.toFixed(2);
 
-  // VIPLEX renk sistemi: inline color
-  if (prev === undefined) {
-    e.style.color = "#ffffff";
+  // ilk değer → beyaz
+  if(prev === undefined){
+    e.style.cssText = "color:#ffffff; font-weight:bold;";
     return;
   }
 
-  if (val > prev) {
-    e.style.color = "#18c964"; // YEŞİL
-  } else if (val < prev) {
-    e.style.color = "#ff4d4f"; // KIRMIZI
-  } else {
-    e.style.color = "#f5c518"; // SARI
+  // ▼ VIPLEX PREVIEW'DE KESİN ÇALIŞAN RENK SİSTEMİ ▼
+  if(val > prev){
+    e.style.cssText = "color:#18c964; font-weight:bold;";   // YEŞİL
+  } 
+  else if(val < prev){
+    e.style.cssText = "color:#ff4d4f; font-weight:bold;";   // KIRMIZI
+  } 
+  else {
+    e.style.cssText = "color:#f5c518; font-weight:bold;";   // SARI
   }
+  // ▲ VIPLEX GARANTİ RENK MOTORU ▲
 }
 
 function fetchRates(){
@@ -71,8 +76,8 @@ function fetchRates(){
       applyChange("eur", data.EUR);
       applyChange("gbp", data.GBP);
 
-      el("time").innerHTML =
-        "Son güncelleme: " + new Date().toLocaleTimeString("tr-TR");
+      el("time").innerHTML = "Son güncelleme: " + 
+        new Date().toLocaleTimeString("tr-TR");
 
       fetchGold();
     })
@@ -82,12 +87,12 @@ function fetchRates(){
 }
 
 function fetchGold(){
-  if (!cacheUSD) return;
+  if(!cacheUSD) return;
 
   fetch("https://data-asg.goldprice.org/dbXRates/USD")
     .then(function(r){ return r.json(); })
     .then(function(j){
-      var ons = j && j.items && j.items[0] && j.items[0].xauPrice;
+      var ons = j.items[0].xauPrice;
       var gram = (ons * cacheUSD) / 31.1035;
       applyChange("gold", gram);
     })
