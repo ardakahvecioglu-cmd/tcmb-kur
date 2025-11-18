@@ -5,12 +5,33 @@
 <meta name="viewport" content="width=640, initial-scale=1, user-scalable=no" />
 <title>Canlı Kurlar</title>
 <style>
-  body { margin:0; background:#0f1115; color:#fff; font-family:Segoe UI,Roboto,Arial; width:100vw; height:100vh; overflow:hidden; position:relative; }
-  header { position:absolute; left:15px; right:15px; bottom:95px; font-size:18px; color:#bbb; text-align:left; }
-  footer { position:absolute; bottom:0; left:0; width:100%; display:flex; justify-content:space-between; padding:10px 15px; background:rgba(0,0,0,0.8); border-top:1px solid #222; }
-  .card { flex:1; text-align:center; margin:0 5px; background:#1a1f29; border-radius:12px; padding:8px 6px; }
+  body {
+    margin:0; background:#0f1115; color:#fff;
+    font-family:Segoe UI,Roboto,Arial;
+    width:100vw; height:100vh; overflow:hidden; position:relative;
+  }
+  header {
+    position:absolute; left:15px; right:15px; bottom:95px;
+    font-size:18px; color:#bbb; text-align:left;
+  }
+  footer {
+    position:absolute; bottom:0; left:0; width:100%;
+    display:flex; justify-content:space-between;
+    padding:10px 15px;
+    background:rgba(0,0,0,0.8);
+    border-top:1px solid #222;
+  }
+  .card {
+    flex:1; text-align:center; margin:0 5px;
+    background:#1a1f29; border-radius:12px; padding:8px 6px;
+  }
   .label { font-size:12px; color:#aaa; }
-  .value { font-size:22px; font-weight:bold; color:#ffffff; }
+  .value-box { height:26px; position:relative; }
+  .val { position:absolute; left:0; right:0; top:0; font-size:22px; font-weight:bold; display:none; }
+  .green { color:#18c964; }
+  .red { color:#ff4d4f; }
+  .yellow { color:#f5c518; }
+  .white { color:#ffffff; }
 </style>
 </head>
 
@@ -19,70 +40,100 @@
 <header><span id="time">Yükleniyor...</span></header>
 
 <footer>
-  <div class="card"><div class="label">USD / TRY</div><div id="usd" class="value">--</div></div>
-  <div class="card"><div class="label">EUR / TRY</div><div id="eur" class="value">--</div></div>
-  <div class="card"><div class="label">GBP / TRY</div><div id="gbp" class="value">--</div></div>
-  <div class="card"><div class="label">GRAM ALTIN</div><div id="gold" class="value">--</div></div>
+
+  <div class="card">
+    <div class="label">USD / TRY</div>
+    <div class="value-box">
+      <span id="usdW" class="val white">--</span>
+      <span id="usdG" class="val green">--</span>
+      <span id="usdR" class="val red">--</span>
+      <span id="usdY" class="val yellow">--</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">EUR / TRY</div>
+    <div class="value-box">
+      <span id="eurW" class="val white">--</span>
+      <span id="eurG" class="val green">--</span>
+      <span id="eurR" class="val red">--</span>
+      <span id="eurY" class="val yellow">--</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">GBP / TRY</div>
+    <div class="value-box">
+      <span id="gbpW" class="val white">--</span>
+      <span id="gbpG" class="val green">--</span>
+      <span id="gbpR" class="val red">--</span>
+      <span id="gbpY" class="val yellow">--</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">GRAM ALTIN</div>
+    <div class="value-box">
+      <span id="goldW" class="val white">--</span>
+      <span id="goldG" class="val green">--</span>
+      <span id="goldR" class="val red">--</span>
+      <span id="goldY" class="val yellow">--</span>
+    </div>
+  </div>
+
 </footer>
 
 <script>
-function el(id){ return document.getElementById(id); }
+function show(idBase, color, val){
+  document.getElementById(idBase + "W").style.display = "none";
+  document.getElementById(idBase + "G").style.display = "none";
+  document.getElementById(idBase + "R").style.display = "none";
+  document.getElementById(idBase + "Y").style.display = "none";
+
+  var el = document.getElementById(idBase + color);
+  el.innerHTML = val;
+  el.style.display = "block";
+}
 
 var last = {};
 var cacheUSD = null;
 
-// VIPLEX UYUMLU RENK MOTORU
-function applyChange(id, val){
-  var e = el(id);
-  if(!e) return;
-
-  if(!isFinite(val)){
-    e.innerHTML="--";
-    e.style.cssText = "color:#ffffff; font-weight:bold;";
+function applyChange(prefix, value){
+  if(!isFinite(value)){
+    show(prefix, "W", "--");
     return;
   }
 
-  var prev = last[id];
-  last[id] = val;
+  var prev = last[prefix];
+  last[prefix] = value;
 
-  e.innerHTML = val.toFixed(2);
+  var v = value.toFixed(2);
 
-  // ilk değer → beyaz
   if(prev === undefined){
-    e.style.cssText = "color:#ffffff; font-weight:bold;";
+    show(prefix, "W", v);
     return;
   }
 
-  // ▼ VIPLEX PREVIEW'DE KESİN ÇALIŞAN RENK SİSTEMİ ▼
-  if(val > prev){
-    e.style.cssText = "color:#18c964; font-weight:bold;";   // YEŞİL
-  } 
-  else if(val < prev){
-    e.style.cssText = "color:#ff4d4f; font-weight:bold;";   // KIRMIZI
-  } 
-  else {
-    e.style.cssText = "color:#f5c518; font-weight:bold;";   // SARI
-  }
-  // ▲ VIPLEX GARANTİ RENK MOTORU ▲
+  if(value > prev) show(prefix, "G", v);     // GREEN
+  else if(value < prev) show(prefix, "R", v); // RED
+  else show(prefix, "Y", v);                  // YELLOW
 }
 
 function fetchRates(){
   fetch("/.netlify/functions/tcmb")
     .then(function(r){ return r.json(); })
     .then(function(data){
+
       cacheUSD = data.USD;
 
       applyChange("usd", data.USD);
       applyChange("eur", data.EUR);
       applyChange("gbp", data.GBP);
 
-      el("time").innerHTML = "Son güncelleme: " + 
-        new Date().toLocaleTimeString("tr-TR");
+      document.getElementById("time").innerHTML =
+        "Son güncelleme: " + new Date().toLocaleTimeString("tr-TR");
 
       fetchGold();
-    })
-    .catch(function(e){
-      console.log("TCMB Error:", e);
     });
 }
 
@@ -95,8 +146,7 @@ function fetchGold(){
       var ons = j.items[0].xauPrice;
       var gram = (ons * cacheUSD) / 31.1035;
       applyChange("gold", gram);
-    })
-    .catch(function(e){ console.log("ALTIN HATASI:", e); });
+    });
 }
 
 window.onload = fetchRates;
