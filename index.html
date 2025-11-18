@@ -27,9 +27,16 @@
     background:#1a1f29; border-radius:12px; padding:8px 6px;
   }
   .label { font-size:12px; color:#aaa; }
-  .value-box { height:26px; }
+  .value-box { 
+      height:26px;
+      line-height:26px;   /* kutu şişmesini engeller */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+  }
   .val {
-    font-size:22px; font-weight:bold;
+    font-size:22px; 
+    font-weight:bold;
     display:none;
   }
 </style>
@@ -44,28 +51,28 @@
   <div class="card">
     <div class="label">USD / TRY</div>
     <div class="value-box">
-      <p id="usd" class="val" style="color:#f5c518;">--</p>
+      <span id="usd" class="val">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">EUR / TRY</div>
     <div class="value-box">
-      <p id="eur" class="val" style="color:#f5c518;">--</p>
+      <span id="eur" class="val">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GBP / TRY</div>
     <div class="value-box">
-      <p id="gbp" class="val" style="color:#f5c518;">--</p>
+      <span id="gbp" class="val">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GRAM ALTIN</div>
     <div class="value-box">
-      <p id="gold" class="val" style="color:#f5c518;">--</p>
+      <span id="gold" class="val">--</span>
     </div>
   </div>
 
@@ -73,9 +80,11 @@
 
 <script>
 function show(id, val){
-  var el = document.getElementById(id);
-  el.innerHTML = val;
-  el.style.display = "block";
+  // TAURUS için kesin çalışan yöntem: <font color="">
+  document.getElementById(id).innerHTML =
+    "<font color='#f5c518'>" + val + "</font>";
+
+  document.getElementById(id).style.display = "block";
 }
 
 var cacheUSD = null;
