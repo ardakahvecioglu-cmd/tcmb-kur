@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=640, initial-scale=1, user-scalable=no" />
 <title>Canlı Kurlar</title>
+
 <style>
   body {
     margin:0; background:#0f1115; color:#fff;
@@ -27,10 +28,11 @@
   }
   .label { font-size:12px; color:#aaa; }
   .value-box { height:26px; position:relative; }
-  .val { position:absolute; left:0; right:0; top:0; font-size:22px; font-weight:bold; display:none; }
-
-  /* Tek renk: Sarı */
-  .yellow { color:#f5c518; }
+  .val {
+    position:absolute; left:0; right:0; top:0;
+    font-size:22px; font-weight:bold;
+    display:none;
+  }
 </style>
 </head>
 
@@ -43,39 +45,38 @@
   <div class="card">
     <div class="label">USD / TRY</div>
     <div class="value-box">
-      <span id="usdY" class="val yellow">--</span>
+      <span id="usd" class="val" style="color:#f5c518;">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">EUR / TRY</div>
     <div class="value-box">
-      <span id="eurY" class="val yellow">--</span>
+      <span id="eur" class="val" style="color:#f5c518;">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GBP / TRY</div>
     <div class="value-box">
-      <span id="gbpY" class="val yellow">--</span>
+      <span id="gbp" class="val" style="color:#f5c518;">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GRAM ALTIN</div>
     <div class="value-box">
-      <span id="goldY" class="val yellow">--</span>
+      <span id="gold" class="val" style="color:#f5c518;">--</span>
     </div>
   </div>
 
 </footer>
 
 <script>
-/* Tüm değerleri sarı gösteren tek fonksiyon */
 function show(prefix, val){
-  var el = document.getElementById(prefix + "Y");
+  var el = document.getElementById(prefix);
   el.innerHTML = val;
-  el.style.display = "block";
+  el.style.display = "block";     // VIPLEX bunu kabul ediyor
 }
 
 var cacheUSD = null;
@@ -85,15 +86,13 @@ function applyChange(prefix, value){
     show(prefix, "--");
     return;
   }
-
-  var v = value.toFixed(2);
-  show(prefix, v);  // Her zaman sarı
+  show(prefix, value.toFixed(2)); // her zaman sarı inline
 }
 
 function fetchRates(){
   fetch("/.netlify/functions/tcmb")
-    .then(function(r){ return r.json(); })
-    .then(function(data){
+    .then(r => r.json())
+    .then(data => {
 
       cacheUSD = data.USD;
 
@@ -112,8 +111,8 @@ function fetchGold(){
   if(!cacheUSD) return;
 
   fetch("https://data-asg.goldprice.org/dbXRates/USD")
-    .then(function(r){ return r.json(); })
-    .then(function(j){
+    .then(r => r.json())
+    .then(j => {
       var ons = j.items[0].xauPrice;
       var gram = (ons * cacheUSD) / 31.1035;
       applyChange("gold", gram);
