@@ -27,11 +27,12 @@
   }
   .label { font-size:12px; color:#aaa; }
   .value-box { height:26px; position:relative; }
-  .val { position:absolute; left:0; right:0; top:0; font-size:22px; font-weight:bold; display:none; }
-  .green { color:#18c964; }
-  .red { color:#ff4d4f; }
-  .yellow { color:#f5c518; }
-  .white { color:#ffffff; }
+  .val {
+    position:absolute; left:0; right:0; top:0;
+    font-size:22px; font-weight:bold;
+    display:block;
+    color:#f5c518; /* HER ZAMAN SARI */
+  }
 </style>
 </head>
 
@@ -44,113 +45,69 @@
   <div class="card">
     <div class="label">USD / TRY</div>
     <div class="value-box">
-      <span id="usdW" class="val white">--</span>
-      <span id="usdG" class="val green">--</span>
-      <span id="usdR" class="val red">--</span>
-      <span id="usdY" class="val yellow">--</span>
+      <span id="usd" class="val">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">EUR / TRY</div>
     <div class="value-box">
-      <span id="eurW" class="val white">--</span>
-      <span id="eurG" class="val green">--</span>
-      <span id="eurR" class="val red">--</span>
-      <span id="eurY" class="val yellow">--</span>
+      <span id="eur" class="val">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GBP / TRY</div>
     <div class="value-box">
-      <span id="gbpW" class="val white">--</span>
-      <span id="gbpG" class="val green">--</span>
-      <span id="gbpR" class="val red">--</span>
-      <span id="gbpY" class="val yellow">--</span>
+      <span id="gbp" class="val">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GRAM ALTIN</div>
     <div class="value-box">
-      <span id="goldW" class="val white">--</span>
-      <span id="goldG" class="val green">--</span>
-      <span id="goldR" class="val red">--</span>
-      <span id="goldY" class="val yellow">--</span>
+      <span id="gold" class="val">--</span>
     </div>
   </div>
 
 </footer>
 
 <script>
-function show(idBase, color, val){
-  document.getElementById(idBase + "W").style.display = "none";
-  document.getElementById(idBase + "G").style.display = "none";
-  document.getElementById(idBase + "R").style.display = "none";
-  document.getElementById(idBase + "Y").style.display = "none";
 
-  var el = document.getElementById(idBase + color);
-  el.innerHTML = val;
-  el.style.display = "block";
+var cacheUSD = 0;
+
+// Her zaman sarı yazdır
+function setVal(id, value){
+  document.getElementById(id).innerHTML =
+    isFinite(value) ? value.toFixed(2) : "--";
 }
 
-var last = {};
-var cacheUSD = null;
-
-function applyChange(prefix, value){
-  if(!isFinite(value)){
-    show(prefix, "W", "--");
-    return;
-  }
-
-  var prev = last[prefix];
-  last[prefix] = value;
-
-  var v = value.toFixed(2);
-
-  if(prev === undefined){
-    show(prefix, "W", v);
-    return;
-  }
-
-  if(value > prev) show(prefix, "G", v);     // GREEN
-  else if(value < prev) show(prefix, "R", v); // RED
-  else show(prefix, "Y", v);                  // YELLOW
-}
-
-function fetchRates(){
+function fetchAll(){
   fetch("/.netlify/functions/tcmb")
-    .then(function(r){ return r.json(); })
-    .then(function(data){
+    .then(r => r.json())
+    .then(data => {
 
       cacheUSD = data.USD;
 
-      applyChange("usd", data.USD);
-      applyChange("eur", data.EUR);
-      applyChange("gbp", data.GBP);
+      setVal("usd", data.USD);
+      setVal("eur", data.EUR);
+      setVal("gbp", data.GBP);
+
+      // Function içinde ONS varsa
+      const ons = data.ONS;
+      const gram = (ons * cacheUSD) / 31.1035;
+
+      setVal("gold", gram);
 
       document.getElementById("time").innerHTML =
         "Son güncelleme: " + new Date().toLocaleTimeString("tr-TR");
-
-      fetchGold();
-    });
+    })
+    .catch(()=>{});
 }
 
-function fetchGold(){
-  if(!cacheUSD) return;
+window.onload = fetchAll;
+setInterval(fetchAll, 60000);
 
-  fetch("https://data-asg.goldprice.org/dbXRates/USD")
-    .then(function(r){ return r.json(); })
-    .then(function(j){
-      var ons = j.items[0].xauPrice;
-      var gram = (ons * cacheUSD) / 31.1035;
-      applyChange("gold", gram);
-    });
-}
-
-window.onload = fetchRates;
-setInterval(fetchRates, 60000);
 </script>
 
 </body>
