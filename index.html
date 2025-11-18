@@ -28,7 +28,10 @@
   }
   .label { font-size:12px; color:#aaa; }
   .value-box { height:26px; }
-  .val { font-size:22px; font-weight:bold; display:none; }
+  .val {
+    font-size:22px; font-weight:bold;
+    display:none;
+  }
 </style>
 </head>
 
@@ -41,56 +44,55 @@
   <div class="card">
     <div class="label">USD / TRY</div>
     <div class="value-box">
-      <div id="usd" class="val">--</div>
+      <p id="usd" class="val" style="color:#f5c518;">--</p>
     </div>
   </div>
 
   <div class="card">
     <div class="label">EUR / TRY</div>
     <div class="value-box">
-      <div id="eur" class="val">--</div>
+      <p id="eur" class="val" style="color:#f5c518;">--</p>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GBP / TRY</div>
     <div class="value-box">
-      <div id="gbp" class="val">--</div>
+      <p id="gbp" class="val" style="color:#f5c518;">--</p>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GRAM ALTIN</div>
     <div class="value-box">
-      <div id="gold" class="val">--</div>
+      <p id="gold" class="val" style="color:#f5c518;">--</p>
     </div>
   </div>
 
 </footer>
 
 <script>
-function show(prefix, val){
-  // TAURUS UYUMLU RENDER: <font color="">
-  document.getElementById(prefix).innerHTML =
-    "<font color='#f5c518'>" + val + "</font>";
-
-  document.getElementById(prefix).style.display = "block";
+function show(id, val){
+  var el = document.getElementById(id);
+  el.innerHTML = val;
+  el.style.display = "block";
 }
 
 var cacheUSD = null;
 
-function applyChange(prefix, value){
+function applyChange(id, value){
   if(!isFinite(value)){
-    show(prefix, "--");
+    show(id, "--");
     return;
   }
-  show(prefix, value.toFixed(2));
+  show(id, value.toFixed(2));
 }
 
 function fetchRates(){
   fetch("/.netlify/functions/tcmb")
     .then(r => r.json())
     .then(data => {
+
       cacheUSD = data.USD;
 
       applyChange("usd", data.USD);
