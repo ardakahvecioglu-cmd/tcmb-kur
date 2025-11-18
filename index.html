@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=640, initial-scale=1, user-scalable=no" />
+<title>Canlı Kurlar</title>
+<style>
+  body { margin:0; background:#0f1115; color:#fff; font-family:Segoe UI,Roboto,Arial; width:100vw; height:100vh; overflow:hidden; position:relative; }
+  header { position:absolute; left:15px; right:15px; bottom:95px; font-size:18px; color:#bbb; text-align:left; }
+  footer { position:absolute; bottom:0; left:0; width:100%; display:flex; justify-content:space-between; padding:10px 15px; background:rgba(0,0,0,0.8); border-top:1px solid #222; }
+  .card { flex:1; text-align:center; margin:0 5px; background:#1a1f29; border-radius:12px; padding:8px 6px; }
+  .label { font-size:12px; color:#aaa; }
+  .value { font-size:22px; font-weight:bold; }
+  .up { color:#18c964; }
+  .down { color:#ff4d4f; }
+  .same { color:#f5c518; }
+</style>
+</head>
+
+<body>
+
+<header><span id="time">Yükleniyor...</span></header>
+
+<footer>
+  <div class="card"><div class="label">USD / TRY</div><div id="usd" class="value">--</div></div>
+  <div class="card"><div class="label">EUR / TRY</div><div id="eur" class="value">--</div></div>
+  <div class="card"><div class="label">GBP / TRY</div><div id="gbp" class="value">--</div></div>
+  <div class="card"><div class="label">GRAM ALTIN</div><div id="gold" class="value">--</div></div>
+</footer>
+
+<script>
+function el(id){ return document.getElementById(id); }
+
+var last = {};
+var cacheUSD = null;
+
+function applyChange(id, val){
+  var e = el(id);
+  if(!e) return;
+
+  if(!isFinite(val)){
+    e.innerHTML="--";
+    e.className="value";
+    return;
+  }
+
+  var prev = last[id];
+  last[id] = val;
+
+  e.innerHTML = val.toFixed(2);
+
+  if(prev === undefined) { e.className="value"; return; }
+  if(val > prev) e.className="value up";
+  else if(val < prev) e.className="value down";
+  else e.className="value same";
+}
+
+function fetchRates(){
+  fetch("/.netlify/functions/tcmb")
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      cacheUSD = data.USD;
+
+      applyChange("usd", data.USD);
+      applyChange("eur", data.EUR);
+      applyChange("gbp", data.GBP);
+
+      el("time").innerHTML =
+        "Son güncelleme: " + new Date().toLocaleTimeString("tr-TR");
+
+      fetchGold();
+    })
+    .catch(function(e){
+      console.log("TCMB Error:", e);
+    });
+}
+
+function fetchGold(){
+  if(!cacheUSD) return;
+
+  fetch("https://data-asg.goldprice.org/dbXRates/USD")
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      var ons = j.items[0].xauPrice;
+      var gram = (ons * cacheUSD) / 31.1035;
+      applyChange("gold", gram);
+    })
+    .catch(function(e){ console.log("ALTIN HATASI:", e); });
+}
+
+window.onload = fetchRates;
+setInterval(fetchRates, 60000);
+</script>
+
+</body>
+</html>
