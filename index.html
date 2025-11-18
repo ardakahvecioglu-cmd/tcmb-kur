@@ -27,12 +27,10 @@
   }
   .label { font-size:12px; color:#aaa; }
   .value-box { height:26px; position:relative; }
-  .val {
-    position:absolute; left:0; right:0; top:0;
-    font-size:22px; font-weight:bold;
-    display:block;
-    color:#f5c518; /* HER ZAMAN SARI */
-  }
+  .val { position:absolute; left:0; right:0; top:0; font-size:22px; font-weight:bold; display:none; }
+
+  /* Tek renk: Sarı */
+  .yellow { color:#f5c518; }
 </style>
 </head>
 
@@ -45,69 +43,85 @@
   <div class="card">
     <div class="label">USD / TRY</div>
     <div class="value-box">
-      <span id="usd" class="val">--</span>
+      <span id="usdY" class="val yellow">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">EUR / TRY</div>
     <div class="value-box">
-      <span id="eur" class="val">--</span>
+      <span id="eurY" class="val yellow">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GBP / TRY</div>
     <div class="value-box">
-      <span id="gbp" class="val">--</span>
+      <span id="gbpY" class="val yellow">--</span>
     </div>
   </div>
 
   <div class="card">
     <div class="label">GRAM ALTIN</div>
     <div class="value-box">
-      <span id="gold" class="val">--</span>
+      <span id="goldY" class="val yellow">--</span>
     </div>
   </div>
 
 </footer>
 
 <script>
-
-var cacheUSD = 0;
-
-// Her zaman sarı yazdır
-function setVal(id, value){
-  document.getElementById(id).innerHTML =
-    isFinite(value) ? value.toFixed(2) : "--";
+/* Tüm değerleri sarı gösteren tek fonksiyon */
+function show(prefix, val){
+  var el = document.getElementById(prefix + "Y");
+  el.innerHTML = val;
+  el.style.display = "block";
 }
 
-function fetchAll(){
+var cacheUSD = null;
+
+function applyChange(prefix, value){
+  if(!isFinite(value)){
+    show(prefix, "--");
+    return;
+  }
+
+  var v = value.toFixed(2);
+  show(prefix, v);  // Her zaman sarı
+}
+
+function fetchRates(){
   fetch("/.netlify/functions/tcmb")
-    .then(r => r.json())
-    .then(data => {
+    .then(function(r){ return r.json(); })
+    .then(function(data){
 
       cacheUSD = data.USD;
 
-      setVal("usd", data.USD);
-      setVal("eur", data.EUR);
-      setVal("gbp", data.GBP);
-
-      // Function içinde ONS varsa
-      const ons = data.ONS;
-      const gram = (ons * cacheUSD) / 31.1035;
-
-      setVal("gold", gram);
+      applyChange("usd", data.USD);
+      applyChange("eur", data.EUR);
+      applyChange("gbp", data.GBP);
 
       document.getElementById("time").innerHTML =
         "Son güncelleme: " + new Date().toLocaleTimeString("tr-TR");
-    })
-    .catch(()=>{});
+
+      fetchGold();
+    });
 }
 
-window.onload = fetchAll;
-setInterval(fetchAll, 60000);
+function fetchGold(){
+  if(!cacheUSD) return;
 
+  fetch("https://data-asg.goldprice.org/dbXRates/USD")
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      var ons = j.items[0].xauPrice;
+      var gram = (ons * cacheUSD) / 31.1035;
+      applyChange("gold", gram);
+    });
+}
+
+window.onload = fetchRates;
+setInterval(fetchRates, 60000);
 </script>
 
 </body>
