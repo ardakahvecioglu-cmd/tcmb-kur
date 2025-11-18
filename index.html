@@ -11,9 +11,6 @@
   .card { flex:1; text-align:center; margin:0 5px; background:#1a1f29; border-radius:12px; padding:8px 6px; }
   .label { font-size:12px; color:#aaa; }
   .value { font-size:22px; font-weight:bold; }
-  .up { color:#18c964; }
-  .down { color:#ff4d4f; }
-  .same { color:#f5c518; }
 </style>
 </head>
 
@@ -36,11 +33,11 @@ var cacheUSD = null;
 
 function applyChange(id, val){
   var e = el(id);
-  if(!e) return;
+  if (!e) return;
 
-  if(!isFinite(val)){
-    e.innerHTML="--";
-    e.className="value";
+  if (!isFinite(val)) {
+    e.innerHTML = "--";
+    e.style.color = "#ffffff";
     return;
   }
 
@@ -49,10 +46,19 @@ function applyChange(id, val){
 
   e.innerHTML = val.toFixed(2);
 
-  if(prev === undefined) { e.className="value"; return; }
-  if(val > prev) e.className="value up";
-  else if(val < prev) e.className="value down";
-  else e.className="value same";
+  // VIPLEX renk sistemi: inline color
+  if (prev === undefined) {
+    e.style.color = "#ffffff";
+    return;
+  }
+
+  if (val > prev) {
+    e.style.color = "#18c964"; // YEŞİL
+  } else if (val < prev) {
+    e.style.color = "#ff4d4f"; // KIRMIZI
+  } else {
+    e.style.color = "#f5c518"; // SARI
+  }
 }
 
 function fetchRates(){
@@ -76,12 +82,12 @@ function fetchRates(){
 }
 
 function fetchGold(){
-  if(!cacheUSD) return;
+  if (!cacheUSD) return;
 
   fetch("https://data-asg.goldprice.org/dbXRates/USD")
     .then(function(r){ return r.json(); })
     .then(function(j){
-      var ons = j.items[0].xauPrice;
+      var ons = j && j.items && j.items[0] && j.items[0].xauPrice;
       var gram = (ons * cacheUSD) / 31.1035;
       applyChange("gold", gram);
     })
