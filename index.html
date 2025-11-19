@@ -11,28 +11,44 @@
     font-family:Segoe UI,Roboto,Arial;
     width:100%; height:100vh; overflow:hidden; position:relative;
   }
+
+  /* === HEADER ORTALANDI === */
   header {
-    position:absolute; left:15px; right:15px; bottom:95px;
-    font-size:18px; color:#bbb; text-align:left;
+    position:absolute;
+    bottom:95px;
+    width:640px;                 /* sabit şerit genişliği */
+    left:50%;                    /* ortala */
+    transform:translateX(-50%);  /* ortala */
+    font-size:18px;
+    color:#bbb;
+    text-align:left;
   }
+
+  /* === FOOTER ORTALANDI === */
   footer {
-    position:absolute; bottom:0; left:0; width:100%;
+    position:absolute;
+    bottom:0;
+    width:640px;                 /* sabit şerit genişliği */
+    left:50%;                    /* ortala */
+    transform:translateX(-50%);  /* ortala */
     display:flex;
-    justify-content:center;   /* ← ekle */
-    padding:10px 15px;
+    justify-content:space-between;
+    padding:10px 0;
     background:rgba(0,0,0,0.8);
     border-top:1px solid #222;
-}
+  }
+
   .card {
     flex:1;
     text-align:center;
-    margin:0 3px;   /* ← 3px en ideal */
+    margin:0 4px;
     background:#1a1f29;
     border-radius:12px;
     padding:8px 6px;
-}
+  }
 
   .label { font-size:12px; color:#aaa; }
+
   .value-box {
       height:26px;
       line-height:26px;
@@ -40,6 +56,7 @@
       justify-content:center;
       align-items:center;
   }
+
   .val {
     font-size:22px;
     font-weight:bold;
@@ -86,8 +103,7 @@
 
 <script>
 
-// TAURUS'ta %100 çalışan renk yöntemi: 
-// Değeri DOM'a sonradan inline style ile YAZMAK.
+// TAURUS'ta %100 çalışan renk yöntemi:
 function show(id, val){
   document.getElementById(id).innerHTML =
     "<span style='color:#f5c518; font-weight:bold; font-size:22px;'>" + val + "</span>";
